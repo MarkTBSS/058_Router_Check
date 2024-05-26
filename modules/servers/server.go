@@ -8,6 +8,7 @@ import (
 
 	_pkgConfig "github.com/MarkTBSS/058_Router_Check/config"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jmoiron/sqlx"
 )
 
 type IServer interface {
@@ -17,6 +18,7 @@ type IServer interface {
 type server struct {
 	cfg _pkgConfig.IConfig
 	app *fiber.App
+	db  *sqlx.DB
 }
 
 func NewServer(cfg _pkgConfig.IConfig) IServer {
@@ -30,10 +32,16 @@ func NewServer(cfg _pkgConfig.IConfig) IServer {
 }
 
 func (s *server) Start() {
+	// Middlewares
+	middlewares := InitMiddlewares(s)
+	s.app.Use(middlewares.Cors())
+
 	// Modules
 	v1 := s.app.Group("v1")
-	modules := InitModule(v1, s)
+	modules := InitModule(v1, s, middlewares)
 	modules.MonitorModule()
+
+	s.app.Use(middlewares.RouterCheck())
 
 	// Graceful Shutdown
 	c := make(chan os.Signal, 1)

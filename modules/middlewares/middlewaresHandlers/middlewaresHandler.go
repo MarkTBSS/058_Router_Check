@@ -2,6 +2,7 @@ package middlewaresHandlers
 
 import (
 	_pkgConfig "github.com/MarkTBSS/058_Router_Check/config"
+	"github.com/MarkTBSS/058_Router_Check/modules/entities"
 	_pkgMiddlewaresMiddlewaresUsecases "github.com/MarkTBSS/058_Router_Check/modules/middlewares/middlewaresUsecases"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -37,5 +38,11 @@ func (h *middlewaresHandler) Cors() fiber.Handler {
 }
 
 func (h *middlewaresHandler) RouterCheck() fiber.Handler {
-	return nil
+	return func(c *fiber.Ctx) error {
+		return entities.NewResponse(c).Error(
+			fiber.ErrNotFound.Code,
+			"middlware-001",
+			"rotuer not found",
+		).Res()
+	}
 }
